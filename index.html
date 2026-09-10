@@ -45,6 +45,27 @@
     position:relative;
   }
 
+  .help-button{
+    position:absolute;
+    top:18px;
+    right:18px;
+    z-index:2;
+    width:42px;
+    height:42px;
+    border:3px solid var(--ink);
+    border-radius:50%;
+    background:var(--amber);
+    color:var(--ink);
+    font-family:var(--font-display);
+    font-size:24px;
+    font-weight:700;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:0 3px 0 var(--amber-dark);
+  }
+  .help-button:hover{ filter:brightness(1.06); }
+  .help-button:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--amber-dark); }
+
   .window{
     background:linear-gradient(180deg,#fffdf6,#faf3df);
     border:7px solid var(--ink);
@@ -144,6 +165,17 @@
     font-size:13px;
     color:#6b6b74;
   }
+  .btn-load{
+    margin-top:12px;
+    background:transparent;
+    border:2px solid var(--cobalt);
+    border-radius:10px;
+    color:var(--cobalt-dark);
+    font:600 14px var(--font-body);
+    padding:9px 14px;
+    cursor:pointer;
+  }
+  .btn-load:hover{ background:#dfe7fb; }
 
   .load-error{
     display:none;
@@ -333,6 +365,82 @@
     margin:0 auto 26px;
   }
 
+  /* ---------- Import and help ---------- */
+  .drop-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1001;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(31,53,104,.84);
+    color:#fff;
+  }
+  .drop-overlay.show{ display:flex; }
+  .drop-message{
+    width:min(560px, 100%);
+    padding:40px 24px;
+    border:4px dashed #fff;
+    border-radius:24px;
+    text-align:center;
+    font-family:var(--font-display);
+    font-size:clamp(22px,4vw,32px);
+  }
+  .drop-message small{
+    display:block;
+    margin-top:12px;
+    font-family:var(--font-body);
+    font-size:15px;
+  }
+
+  .help-modal{
+    position:fixed;
+    inset:0;
+    z-index:1002;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background:rgba(28,28,34,.58);
+  }
+  .help-modal.show{ display:flex; }
+  .help-card{
+    width:min(720px, 100%);
+    max-height:min(760px, 92vh);
+    overflow:auto;
+    padding:clamp(22px,4vw,36px);
+    border:4px solid var(--ink);
+    border-radius:22px;
+    background:#fffdf6;
+    box-shadow:0 10px 0 rgba(28,28,34,.2);
+  }
+  .help-card h2{ color:var(--cobalt-dark); font-size:28px; }
+  .help-card p{ line-height:1.45; }
+  .prompt-box{
+    display:block;
+    width:100%;
+    min-height:280px;
+    resize:vertical;
+    padding:13px;
+    border:2px solid var(--ink);
+    border-radius:12px;
+    background:#f6efdc;
+    color:var(--ink);
+    font:13px/1.42 ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  .help-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+  .btn-secondary{
+    border:2px solid var(--ink);
+    border-radius:10px;
+    padding:10px 16px;
+    background:#fff;
+    color:var(--ink);
+    font:600 14px var(--font-body);
+    cursor:pointer;
+  }
+  .btn-copy{ background:var(--emerald); color:#fff; }
+
   /* ---------- Confetti canvas ---------- */
   #confettiCanvas{
     position:fixed;
@@ -352,6 +460,7 @@
 <body>
 
 <div id="app">
+  <button class="help-button" id="helpButton" type="button" aria-label="Ayuda para crear o cargar preguntas" title="Ayuda">?</button>
   <div class="window">
 
     <!-- START SCREEN -->
@@ -369,6 +478,7 @@
       <br>
       <button class="btn-primary" id="startBtn" disabled>Cargando preguntas…</button>
       <p class="start-meta" id="startMeta"></p>
+      <button class="btn-load" id="loadJsonBtn" type="button">Cargar otro archivo JSON</button>
 
       <div class="load-error" id="loadError">
         No se han podido cargar las preguntas desde <code>preguntas.json</code>.<br><br>
@@ -411,6 +521,60 @@
 
 <canvas id="confettiCanvas"></canvas>
 
+<input id="jsonFileInput" type="file" accept="application/json,.json" hidden>
+<div class="drop-overlay" id="dropOverlay" aria-hidden="true">
+  <div class="drop-message">Suelta aquí tu archivo JSON<small>Reemplazará las preguntas actuales.</small></div>
+</div>
+<div class="help-modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-hidden="true">
+  <div class="help-card">
+    <h2 id="helpTitle">Crear un archivo de preguntas</h2>
+    <p>Pide a una IA que genere el archivo con este texto. Guarda su respuesta en un archivo con extensión <strong>.json</strong> y arrástralo a cualquier parte de esta página, o usa «Cargar otro archivo JSON».</p>
+    <textarea class="prompt-box" id="promptText" readonly aria-label="Instrucciones para la inteligencia artificial">Crea un archivo JSON válido para un cuestionario escolar. Devuelve ÚNICAMENTE el JSON, sin explicaciones ni bloques de código Markdown.
+
+Debe tener exactamente esta estructura general:
+{
+  "intro": {
+    "title": "Título del cuestionario",
+    "lead": "Breve texto de bienvenida o instrucciones"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "Nombre del tema",
+      "difficulty": "facil",
+      "type": "vf",
+      "question": "Enunciado de la pregunta",
+      "options": ["Verdadero", "Falso"],
+      "answer": 0
+    },
+    {
+      "id": 2,
+      "category": "Nombre del tema",
+      "difficulty": "medio",
+      "type": "mc",
+      "question": "Otra pregunta",
+      "options": ["Opción 1", "Opción 2", "Opción 3", "Opción 4"],
+      "answer": 2
+    }
+  ]
+}
+
+Reglas obligatorias:
+- "intro.title" y "intro.lead" deben ser textos.
+- "questions" debe contener una o más preguntas.
+- Cada pregunta necesita: id, category, difficulty, type, question, options y answer.
+- "difficulty" solo puede ser "facil" o "medio".
+- "type" es "vf" para verdadero/falso (exactamente 2 opciones) o "mc" para elección múltiple (exactamente 4 opciones).
+- "answer" es el número de la opción correcta y empieza en 0. Por ejemplo, en 4 opciones: 0, 1, 2 o 3.
+- Todos los textos deben estar en español y las preguntas deben ser apropiadas para alumnado de [INDICA AQUÍ EL CURSO Y EL TEMA].
+- Crea [INDICA AQUÍ EL NÚMERO] preguntas variadas y asegúrate de que las respuestas correctas sean exactas.</textarea>
+    <div class="help-actions">
+      <button class="btn-secondary" id="closeHelpBtn" type="button">Cerrar</button>
+      <button class="btn-secondary btn-copy" id="copyPromptBtn" type="button">Copiar instrucciones</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   const screens = {
@@ -437,6 +601,15 @@
   const restartBtn = document.getElementById('restartBtn');
   const finalScoreLine = document.getElementById('finalScoreLine');
   const finalMessage = document.getElementById('finalMessage');
+  const loadJsonBtn = document.getElementById('loadJsonBtn');
+  const jsonFileInput = document.getElementById('jsonFileInput');
+  const dropOverlay = document.getElementById('dropOverlay');
+  const helpButton = document.getElementById('helpButton');
+  const helpModal = document.getElementById('helpModal');
+  const closeHelpBtn = document.getElementById('closeHelpBtn');
+  const copyPromptBtn = document.getElementById('copyPromptBtn');
+  const promptText = document.getElementById('promptText');
+  const defaultLoadError = loadError.innerHTML;
 
   let ALL_QUESTIONS = [];
   let quizQuestions = [];
@@ -444,23 +617,92 @@
   let score = 0;
   let answered = 0;
   let hasAnsweredCurrent = false;
+  let customDataLoaded = false;
+  let dragDepth = 0;
 
   /* ---------------- Load data ---------------- */
+  function validateQuizData(data){
+    if(!data || typeof data !== 'object') return 'El archivo no contiene un objeto JSON válido.';
+    if(!data.intro || typeof data.intro.title !== 'string' || typeof data.intro.lead !== 'string'){
+      return 'Falta "intro" con los textos "title" y "lead".';
+    }
+    if(!Array.isArray(data.questions) || data.questions.length === 0){
+      return 'Falta una lista "questions" con al menos una pregunta.';
+    }
+    for(let i = 0; i < data.questions.length; i++){
+      const q = data.questions[i];
+      const prefix = 'La pregunta ' + (i + 1) + ': ';
+      if(!q || typeof q !== 'object') return prefix + 'no tiene un formato válido.';
+      if(!('id' in q) || typeof q.category !== 'string' || typeof q.question !== 'string'){
+        return prefix + 'necesita id, category y question.';
+      }
+      if(q.difficulty !== 'facil' && q.difficulty !== 'medio'){
+        return prefix + 'difficulty debe ser "facil" o "medio".';
+      }
+      if(q.type !== 'vf' && q.type !== 'mc'){
+        return prefix + 'type debe ser "vf" o "mc".';
+      }
+      if(!Array.isArray(q.options) || ![2, 4].includes(q.options.length) || q.options.some(option => typeof option !== 'string')){
+        return prefix + 'options debe contener exactamente 2 o 4 textos.';
+      }
+      if((q.type === 'vf' && q.options.length !== 2) || (q.type === 'mc' && q.options.length !== 4)){
+        return prefix + 'el número de opciones no coincide con su type.';
+      }
+      if(!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.options.length){
+        return prefix + 'answer debe ser el índice de una opción válida, empezando en 0.';
+      }
+    }
+    return null;
+  }
+
+  function setQuizData(data, imported){
+    ALL_QUESTIONS = data.questions;
+    startTitle.textContent = data.intro.title;
+    startLead.textContent = data.intro.lead;
+    startMeta.textContent = ALL_QUESTIONS.length + ' preguntas · ' + (imported ? 'archivo cargado correctamente' : 'fáciles e intermedias');
+    startBtn.disabled = false;
+    startBtn.textContent = 'Empezar';
+    loadError.classList.remove('show');
+    showScreen('start');
+  }
+
+  function showImportError(message){
+    loadError.textContent = message;
+    loadError.classList.add('show');
+  }
+
+  function importJsonFile(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+      try{
+        const data = JSON.parse(event.target.result);
+        const validationError = validateQuizData(data);
+        if(validationError) throw new Error(validationError);
+        customDataLoaded = true;
+        setQuizData(data, true);
+      } catch(error){
+        showImportError('No se ha podido cargar el archivo: ' + error.message);
+      }
+    };
+    reader.onerror = () => showImportError('No se ha podido leer el archivo seleccionado.');
+    reader.readAsText(file, 'UTF-8');
+  }
+
   fetch('preguntas.json')
     .then(res => {
       if(!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     })
     .then(data => {
-      ALL_QUESTIONS = data.questions;
-      startTitle.textContent = data.intro.title;
-      startLead.textContent = data.intro.lead;
-      startMeta.textContent = ALL_QUESTIONS.length + ' preguntas · fáciles e intermedias';
-      startBtn.disabled = false;
-      startBtn.textContent = 'Empezar';
+      const validationError = validateQuizData(data);
+      if(validationError) throw new Error(validationError);
+      if(!customDataLoaded) setQuizData(data, false);
     })
-    .catch(err => {
+    .catch(() => {
+      if(customDataLoaded) return;
       startTitle.textContent = 'Repaso de Religión';
+      loadError.innerHTML = defaultLoadError;
       loadError.classList.add('show');
       startBtn.textContent = 'No disponible';
     });
@@ -539,11 +781,11 @@
     const buttons = optionsGrid.querySelectorAll('.option');
     buttons.forEach((btn, i) => {
       if(i === correctIdx){
+        addAnswerMark(btn, '✓');
         btn.classList.add('reveal-correct');
-        btn.innerHTML = '<span class="mark">✓</span>' + btn.textContent;
       } else if(i === idx){
+        addAnswerMark(btn, '✕');
         btn.classList.add('chosen', 'reveal-wrong');
-        btn.innerHTML = '<span class="mark">✕</span>' + btn.textContent;
       }
     });
     optionsGrid.classList.add('locked');
@@ -586,6 +828,92 @@
     }
     finalMessage.textContent = msg;
   }
+
+  function addAnswerMark(button, markText){
+    const optionText = button.textContent;
+    const mark = document.createElement('span');
+    mark.className = 'mark';
+    mark.textContent = markText;
+    button.replaceChildren(mark, document.createTextNode(optionText));
+  }
+
+  /* ---------------- Import and help ---------------- */
+  function showDropOverlay(show){
+    dropOverlay.classList.toggle('show', show);
+    dropOverlay.setAttribute('aria-hidden', String(!show));
+  }
+
+  function openHelp(){
+    helpModal.classList.add('show');
+    helpModal.setAttribute('aria-hidden', 'false');
+    closeHelpBtn.focus();
+  }
+
+  function closeHelp(){
+    helpModal.classList.remove('show');
+    helpModal.setAttribute('aria-hidden', 'true');
+    helpButton.focus();
+  }
+
+  async function copyInstructions(){
+    try{
+      await navigator.clipboard.writeText(promptText.value);
+    } catch(error){
+      promptText.focus();
+      promptText.select();
+      document.execCommand('copy');
+    }
+    copyPromptBtn.textContent = '¡Copiado!';
+    window.setTimeout(() => { copyPromptBtn.textContent = 'Copiar instrucciones'; }, 1800);
+  }
+
+  loadJsonBtn.addEventListener('click', () => jsonFileInput.click());
+  jsonFileInput.addEventListener('change', event => {
+    importJsonFile(event.target.files[0]);
+    event.target.value = '';
+  });
+
+  function dragEventHasFiles(event){
+    const types = event.dataTransfer && event.dataTransfer.types;
+    return types && (typeof types.includes === 'function' ? types.includes('Files') : types.contains('Files'));
+  }
+
+  window.addEventListener('dragenter', event => {
+    if(!dragEventHasFiles(event)) return;
+    event.preventDefault();
+    dragDepth++;
+    showDropOverlay(true);
+  });
+  window.addEventListener('dragover', event => {
+    if(!dragEventHasFiles(event)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  });
+  window.addEventListener('dragleave', event => {
+    if(!dragEventHasFiles(event)) return;
+    dragDepth--;
+    if(dragDepth <= 0){
+      dragDepth = 0;
+      showDropOverlay(false);
+    }
+  });
+  window.addEventListener('drop', event => {
+    if(!event.dataTransfer.files.length) return;
+    event.preventDefault();
+    dragDepth = 0;
+    showDropOverlay(false);
+    importJsonFile(event.dataTransfer.files[0]);
+  });
+
+  helpButton.addEventListener('click', openHelp);
+  closeHelpBtn.addEventListener('click', closeHelp);
+  helpModal.addEventListener('click', event => {
+    if(event.target === helpModal) closeHelp();
+  });
+  copyPromptBtn.addEventListener('click', copyInstructions);
+  window.addEventListener('keydown', event => {
+    if(event.key === 'Escape' && helpModal.classList.contains('show')) closeHelp();
+  });
 
   startBtn.addEventListener('click', startQuiz);
   nextBtn.addEventListener('click', nextQuestion);

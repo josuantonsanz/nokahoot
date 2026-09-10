@@ -19,6 +19,12 @@ Después, abre <http://localhost:8000> en el navegador.
 - `index.html`: interfaz y lógica del cuestionario.
 - `preguntas.json`: presentación y banco de 30 preguntas, editable sin tocar el código.
 
+## Cargar otro cuestionario
+
+El cuestionario puede sustituirse sin editar la página: arrastra un archivo `.json` sobre cualquier parte de la pantalla o pulsa **«Cargar otro archivo JSON»** en la portada. El archivo se valida antes de cargarlo y se mostrará un aviso si falta algún dato.
+
+El botón circular **?**, situado en la esquina superior derecha, incluye un texto listo para copiar y pegar en una IA. Ese texto indica exactamente el formato que debe generar.
+
 ## Personalizar preguntas
 
 Cada pregunta de `preguntas.json` contiene:
