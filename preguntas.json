@@ -1,0 +1,38 @@
+{
+  "intro": {
+    "title": "Repaso de Religión",
+    "lead": "Bienvenidos a 1º de ESO. Antes de empezar, vamos a ver cuánto recordáis de lo que aprendisteis en Religión en sexto de Primaria. Respondéis a mano alzada y el profesor marca la opción más votada."
+  },
+  "questions": [
+    {"id":1,"category":"Antiguo Testamento","difficulty":"facil","type":"vf","question":"Según el libro del Génesis, Dios creó el mundo.","options":["Verdadero","Falso"],"answer":0},
+    {"id":2,"category":"Antiguo Testamento","difficulty":"facil","type":"vf","question":"Según la Biblia, Adán y Eva vivían en Egipto.","options":["Verdadero","Falso"],"answer":1},
+    {"id":3,"category":"Antiguo Testamento","difficulty":"medio","type":"mc","question":"¿Quién construyó un arca para salvarse de un gran diluvio?","options":["Abraham","Noé","Moisés","David"],"answer":1},
+    {"id":4,"category":"Antiguo Testamento","difficulty":"facil","type":"vf","question":"Dios entregó los Diez Mandamientos a Abraham.","options":["Verdadero","Falso"],"answer":1},
+    {"id":5,"category":"Antiguo Testamento","difficulty":"medio","type":"mc","question":"¿En qué monte recibió Moisés los Diez Mandamientos?","options":["Monte Sinaí","Monte Tabor","Monte Calvario","Monte de los Olivos"],"answer":0},
+    {"id":6,"category":"Antiguo Testamento","difficulty":"medio","type":"mc","question":"¿Quién venció al gigante Goliat con una honda?","options":["Sansón","Salomón","David","Josué"],"answer":2},
+    {"id":7,"category":"Vida de Jesús","difficulty":"facil","type":"vf","question":"Jesús nació en Nazaret.","options":["Verdadero","Falso"],"answer":1},
+    {"id":8,"category":"Vida de Jesús","difficulty":"facil","type":"vf","question":"María es la madre de Jesús.","options":["Verdadero","Falso"],"answer":0},
+    {"id":9,"category":"Vida de Jesús","difficulty":"facil","type":"vf","question":"Jesús eligió a veinte apóstoles.","options":["Verdadero","Falso"],"answer":1},
+    {"id":10,"category":"Vida de Jesús","difficulty":"medio","type":"mc","question":"¿Quién traicionó a Jesús entregándolo a sus enemigos?","options":["Pedro","Juan","Judas","Tomás"],"answer":2},
+    {"id":11,"category":"Vida de Jesús","difficulty":"medio","type":"mc","question":"¿Qué apóstol negó tres veces conocer a Jesús?","options":["Juan","Pedro","Tomás","Santiago"],"answer":1},
+    {"id":12,"category":"Vida de Jesús","difficulty":"facil","type":"vf","question":"Jesús multiplicó unos panes y peces para dar de comer a mucha gente.","options":["Verdadero","Falso"],"answer":0},
+    {"id":13,"category":"Vida de Jesús","difficulty":"medio","type":"mc","question":"¿Cómo se llama la oración que Jesús enseñó a sus discípulos?","options":["El Ave María","El Padre Nuestro","El Credo","El Gloria"],"answer":1},
+    {"id":14,"category":"Vida de Jesús","difficulty":"medio","type":"mc","question":"En la parábola del Buen Samaritano, ¿quién ayuda al hombre herido en el camino?","options":["Un sacerdote","Un levita","Un samaritano","Un fariseo"],"answer":2},
+    {"id":15,"category":"Iglesia y apóstoles","difficulty":"facil","type":"vf","question":"Pentecostés celebra la llegada del Espíritu Santo a los apóstoles.","options":["Verdadero","Falso"],"answer":0},
+    {"id":16,"category":"Iglesia y apóstoles","difficulty":"medio","type":"mc","question":"¿Cuál de estos NO formaba parte de los doce apóstoles?","options":["Pedro","Andrés","Pablo","Santiago"],"answer":2},
+    {"id":17,"category":"Iglesia y apóstoles","difficulty":"facil","type":"vf","question":"El Papa es el obispo de Roma.","options":["Verdadero","Falso"],"answer":0},
+    {"id":18,"category":"Iglesia y apóstoles","difficulty":"medio","type":"mc","question":"San Pablo recorrió el Mediterráneo anunciando el Evangelio en varios...","options":["Viajes misioneros","Peregrinajes","Concilios","Sínodos"],"answer":0},
+    {"id":19,"category":"Iglesia y apóstoles","difficulty":"facil","type":"vf","question":"La Biblia solo tiene el Antiguo Testamento.","options":["Verdadero","Falso"],"answer":1},
+    {"id":20,"category":"Sacramentos y liturgia","difficulty":"facil","type":"vf","question":"El Bautismo es un sacramento.","options":["Verdadero","Falso"],"answer":0},
+    {"id":21,"category":"Sacramentos y liturgia","difficulty":"medio","type":"mc","question":"¿Cuántos sacramentos hay en la Iglesia católica?","options":["Cinco","Seis","Siete","Ocho"],"answer":2},
+    {"id":22,"category":"Sacramentos y liturgia","difficulty":"facil","type":"vf","question":"La Navidad celebra la resurrección de Jesús.","options":["Verdadero","Falso"],"answer":1},
+    {"id":23,"category":"Sacramentos y liturgia","difficulty":"medio","type":"mc","question":"¿Qué fiesta celebra la resurrección de Jesús?","options":["Epifanía","Pascua","Pentecostés","Adviento"],"answer":1},
+    {"id":24,"category":"Sacramentos y liturgia","difficulty":"facil","type":"vf","question":"La Cuaresma dura cien días.","options":["Verdadero","Falso"],"answer":1},
+    {"id":25,"category":"Sacramentos y liturgia","difficulty":"medio","type":"mc","question":"¿Qué tiempo litúrgico se vive antes de la Navidad para prepararla?","options":["Cuaresma","Adviento","Pascua","Pentecostés"],"answer":1},
+    {"id":26,"category":"Los pasionistas","difficulty":"facil","type":"vf","question":"Santa Teresa de Jesús es una santa pasionista.","options":["Verdadero","Falso"],"answer":1},
+    {"id":27,"category":"Los pasionistas","difficulty":"medio","type":"mc","question":"¿Quién fundó la Congregación de los Pasionistas?","options":["San Gabriel de la Dolorosa","San Pablo de la Cruz","San Francisco de Asís","San Ignacio de Loyola"],"answer":1},
+    {"id":28,"category":"Los pasionistas","difficulty":"facil","type":"vf","question":"Santa Gema Galgani está relacionada con los pasionistas.","options":["Verdadero","Falso"],"answer":0},
+    {"id":29,"category":"Los pasionistas","difficulty":"facil","type":"vf","question":"Los pasionistas dedican su vida a recordar la Pasión de Jesús.","options":["Verdadero","Falso"],"answer":0},
+    {"id":30,"category":"Los pasionistas","difficulty":"medio","type":"mc","question":"¿Qué llevan los pasionistas cosido en su hábito, con una cruz sobre un corazón?","options":["El signo pasionista","Un rosario","Una medalla","Un escudo con una paloma"],"answer":0}
+  ]
+}

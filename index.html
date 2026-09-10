@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repaso de Religión · 1º ESO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1c22;
+    --parchment:#f6efdc;
+    --parchment-dark:#ece0c2;
+    --cobalt:#2c4a93;      --cobalt-dark:#1f3568;
+    --ruby:#b7333f;        --ruby-dark:#8c232c;
+    --emerald:#2e7d5b;     --emerald-dark:#205940;
+    --amber:#d9a441;       --amber-dark:#a87927;
+    --violet:#6a4c93;      --violet-dark:#4c3569;
+    --font-display:'Fredoka', ui-rounded, 'Segoe UI', sans-serif;
+    --font-body: ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(circle at 50% 0%, #fffaee 0%, var(--parchment) 55%, var(--parchment-dark) 100%);
+    font-family:var(--font-body);
+    color:var(--ink);
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: clamp(12px, 3vw, 32px);
+  }
+
+  #app{
+    width:100%;
+    max-width:760px;
+    position:relative;
+  }
+
+  .window{
+    background:linear-gradient(180deg,#fffdf6,#faf3df);
+    border:7px solid var(--ink);
+    border-radius: 88px 88px 20px 20px;
+    padding: clamp(28px, 5vw, 56px) clamp(20px, 5vw, 44px) clamp(24px, 4vw, 36px);
+    box-shadow: 0 10px 0 rgba(28,28,34,0.08);
+  }
+
+  @media (max-width: 520px){
+    .window{ border-radius: 48px 48px 16px 16px; }
+  }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+
+  /* ---------- Shared bits ---------- */
+  h1,h2,h3{
+    font-family:var(--font-display);
+    margin:0;
+    line-height:1.15;
+  }
+
+  .eyebrow-dots{
+    display:flex; gap:10px; justify-content:center; margin-bottom:18px;
+  }
+  .eyebrow-dots span{
+    width:14px; height:14px; border-radius:50%;
+    border:3px solid var(--ink);
+  }
+  .eyebrow-dots span:nth-child(1){ background:var(--cobalt); }
+  .eyebrow-dots span:nth-child(2){ background:var(--ruby); }
+  .eyebrow-dots span:nth-child(3){ background:var(--amber); }
+  .eyebrow-dots span:nth-child(4){ background:var(--emerald); }
+  .eyebrow-dots span:nth-child(5){ background:var(--violet); }
+
+  /* ---------- Start screen ---------- */
+  #screen-start{ text-align:center; }
+  #screen-start h1{
+    font-size: clamp(26px, 5vw, 36px);
+    color:var(--cobalt-dark);
+  }
+  #startLead{
+    font-size: clamp(15px, 2.4vw, 18px);
+    max-width: 46ch;
+    margin: 14px auto 26px;
+    color:#3c3c44;
+  }
+
+  .option-toggle{
+    display:inline-flex;
+    border:3px solid var(--ink);
+    border-radius:999px;
+    overflow:hidden;
+    margin-bottom:30px;
+  }
+  .option-toggle label{
+    padding:10px 20px;
+    font-size:15px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .option-toggle input{ display:none; }
+  .option-toggle label.left{ border-right:3px solid var(--ink); }
+  .option-toggle input:checked + label{
+    background:var(--amber);
+  }
+
+  .btn-primary{
+    font-family:var(--font-display);
+    font-size:20px;
+    font-weight:600;
+    color:#fff;
+    background:var(--cobalt);
+    border:4px solid var(--ink);
+    border-radius:18px;
+    padding:16px 40px;
+    cursor:pointer;
+    box-shadow:0 6px 0 var(--cobalt-dark);
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .btn-primary:hover{ filter:brightness(1.05); }
+  .btn-primary:active{
+    transform:translateY(4px);
+    box-shadow:0 2px 0 var(--cobalt-dark);
+  }
+  .btn-primary:disabled{
+    opacity:.55;
+    cursor:default;
+  }
+  .btn-primary:disabled:active{
+    transform:none;
+    box-shadow:0 6px 0 var(--cobalt-dark);
+  }
+
+  .start-meta{
+    margin-top:22px;
+    font-size:13px;
+    color:#6b6b74;
+  }
+
+  .load-error{
+    display:none;
+    text-align:left;
+    background:#fbe6e6;
+    border:2px solid var(--ruby-dark);
+    border-radius:14px;
+    padding:16px 18px;
+    font-size:14px;
+    color:var(--ruby-dark);
+    margin-top:22px;
+    line-height:1.5;
+  }
+  .load-error.show{ display:block; }
+  .load-error code{
+    background:#fff;
+    padding:1px 6px;
+    border-radius:6px;
+    font-size:13px;
+  }
+
+  /* ---------- Quiz screen ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom: 22px;
+  }
+  .progress-track{
+    flex:1;
+    height:14px;
+    background:#e6dcc0;
+    border:3px solid var(--ink);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:var(--emerald);
+    transition:width .25s ease;
+  }
+  .score-pill{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:14px;
+    white-space:nowrap;
+    background:var(--ink);
+    color:#fff;
+    padding:8px 14px;
+    border-radius:999px;
+  }
+
+  .tags{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .tag{
+    font-size:13px;
+    font-weight:600;
+    padding:5px 12px;
+    border-radius:999px;
+    border:2px solid var(--ink);
+  }
+  .tag-category{ background:#dfe7fb; color:var(--cobalt-dark); }
+  .tag-easy{ background:#dcf1e6; color:var(--emerald-dark); }
+  .tag-medium{ background:#faeccb; color:var(--amber-dark); }
+
+  #questionText{
+    font-size: clamp(20px, 3.4vw, 27px);
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+
+  .options-grid{
+    display:grid;
+    gap:8px;
+    background:var(--ink);
+    padding:8px;
+    border-radius:20px;
+  }
+  .options-grid.cols-2{ grid-template-columns:1fr 1fr; }
+  .options-grid.cols-2x2{ grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+  @media (max-width:480px){
+    .options-grid.cols-2x2{ grid-template-columns:1fr; grid-template-rows:none; }
+  }
+
+  .option{
+    font-family:var(--font-body);
+    font-size: clamp(15px, 2.2vw, 17px);
+    font-weight:600;
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding: 20px 14px;
+    min-height:76px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    line-height:1.25;
+    transition: transform .08s ease, filter .12s ease, opacity .12s ease;
+  }
+  .option:hover{ filter:brightness(1.08); }
+  .option:active{ transform:scale(.98); }
+  .option:focus-visible{ outline:3px solid #fff; outline-offset:-6px; }
+
+  .option.c0{ background:var(--cobalt); }
+  .option.c1{ background:var(--ruby); }
+  .option.c2{ background:var(--amber); color:var(--ink); }
+  .option.c3{ background:var(--violet); }
+
+  .options-grid.locked .option{ cursor:default; }
+  .options-grid.locked .option:not(.chosen):not(.reveal-correct){ opacity:.45; }
+  .options-grid.locked .option:hover{ filter:none; }
+
+  .option.reveal-correct{
+    background:var(--emerald) !important;
+    color:#fff;
+    animation: pop .38s ease;
+  }
+  .option.reveal-wrong{
+    background:var(--ruby-dark) !important;
+    color:#fff;
+    animation: shake .45s ease;
+  }
+  .option .mark{ margin-right:8px; font-size:1.1em; }
+
+  @keyframes pop{
+    0%{ transform:scale(1); }
+    45%{ transform:scale(1.06); }
+    100%{ transform:scale(1); }
+  }
+  @keyframes shake{
+    10%,90%{ transform:translateX(-2px); }
+    20%,80%{ transform:translateX(4px); }
+    30%,50%,70%{ transform:translateX(-7px); }
+    40%,60%{ transform:translateX(7px); }
+  }
+
+  .btn-next{
+    display:block;
+    margin:22px auto 0;
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:16px;
+    color:#fff;
+    background:var(--ink);
+    border:none;
+    border-radius:14px;
+    padding:12px 26px;
+    cursor:pointer;
+  }
+  .hidden{ display:none !important; }
+
+  .finish-early{
+    display:block;
+    margin:16px auto 0;
+    background:none;
+    border:none;
+    color:#7a7a83;
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  /* ---------- End screen ---------- */
+  #screen-end{ text-align:center; }
+  #screen-end h2{
+    font-size: clamp(24px,4.5vw,32px);
+    color:var(--cobalt-dark);
+    margin-bottom:8px;
+  }
+  #finalScoreLine{
+    font-family:var(--font-display);
+    font-size: clamp(38px,8vw,54px);
+    color:var(--ink);
+    margin: 10px 0 6px;
+  }
+  #finalMessage{
+    font-size:16px;
+    color:#3c3c44;
+    max-width:44ch;
+    margin:0 auto 26px;
+  }
+
+  /* ---------- Confetti canvas ---------- */
+  #confettiCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:999;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .option.reveal-correct, .option.reveal-wrong{ animation:none !important; }
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="window">
+
+    <!-- START SCREEN -->
+    <section id="screen-start" class="screen active">
+      <div class="eyebrow-dots"><span></span><span></span><span></span><span></span><span></span></div>
+      <h1 id="startTitle">Cargando…</h1>
+      <p id="startLead"></p>
+
+      <div class="option-toggle">
+        <input type="radio" id="orderShuffle" name="order" checked>
+        <label class="left" for="orderShuffle">Orden aleatorio</label>
+        <input type="radio" id="orderFixed" name="order">
+        <label for="orderFixed">En orden</label>
+      </div>
+      <br>
+      <button class="btn-primary" id="startBtn" disabled>Cargando preguntas…</button>
+      <p class="start-meta" id="startMeta"></p>
+
+      <div class="load-error" id="loadError">
+        No se han podido cargar las preguntas desde <code>preguntas.json</code>.<br><br>
+        Algunos navegadores (sobre todo Chrome) bloquean por seguridad la carga de archivos locales al abrir el HTML con doble clic. Dos soluciones rápidas:<br><br>
+        · Abre este archivo con <strong>Firefox</strong> en vez de Chrome.<br>
+        · O, en la carpeta donde están los dos archivos, abre una terminal y ejecuta <code>python3 -m http.server</code>, y luego entra en <code>http://localhost:8000</code>.
+      </div>
+    </section>
+
+    <!-- QUIZ SCREEN -->
+    <section id="screen-quiz" class="screen">
+      <div class="topbar">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="score-pill">Aciertos <span id="scoreCount">0</span>/<span id="answeredCount">0</span></div>
+      </div>
+
+      <div class="tags">
+        <span class="tag tag-category" id="tagCategory"></span>
+        <span class="tag" id="tagDifficulty"></span>
+      </div>
+
+      <h2 id="questionText"></h2>
+      <div id="optionsGrid" class="options-grid"></div>
+
+      <button class="btn-next hidden" id="nextBtn">Siguiente pregunta</button>
+      <button class="finish-early" id="finishEarlyBtn">Terminar aquí y ver el resultado</button>
+    </section>
+
+    <!-- END SCREEN -->
+    <section id="screen-end" class="screen">
+      <div class="eyebrow-dots"><span></span><span></span><span></span><span></span><span></span></div>
+      <h2>Repaso terminado</h2>
+      <div id="finalScoreLine"></div>
+      <p id="finalMessage"></p>
+      <button class="btn-primary" id="restartBtn">Volver a jugar</button>
+    </section>
+
+  </div>
+</div>
+
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+(function(){
+  const screens = {
+    start: document.getElementById('screen-start'),
+    quiz: document.getElementById('screen-quiz'),
+    end: document.getElementById('screen-end')
+  };
+
+  const startTitle = document.getElementById('startTitle');
+  const startLead = document.getElementById('startLead');
+  const startBtn = document.getElementById('startBtn');
+  const startMeta = document.getElementById('startMeta');
+  const loadError = document.getElementById('loadError');
+  const orderShuffle = document.getElementById('orderShuffle');
+  const progressFill = document.getElementById('progressFill');
+  const scoreCountEl = document.getElementById('scoreCount');
+  const answeredCountEl = document.getElementById('answeredCount');
+  const tagCategory = document.getElementById('tagCategory');
+  const tagDifficulty = document.getElementById('tagDifficulty');
+  const questionText = document.getElementById('questionText');
+  const optionsGrid = document.getElementById('optionsGrid');
+  const nextBtn = document.getElementById('nextBtn');
+  const finishEarlyBtn = document.getElementById('finishEarlyBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const finalScoreLine = document.getElementById('finalScoreLine');
+  const finalMessage = document.getElementById('finalMessage');
+
+  let ALL_QUESTIONS = [];
+  let quizQuestions = [];
+  let currentIndex = 0;
+  let score = 0;
+  let answered = 0;
+  let hasAnsweredCurrent = false;
+
+  /* ---------------- Load data ---------------- */
+  fetch('preguntas.json')
+    .then(res => {
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(data => {
+      ALL_QUESTIONS = data.questions;
+      startTitle.textContent = data.intro.title;
+      startLead.textContent = data.intro.lead;
+      startMeta.textContent = ALL_QUESTIONS.length + ' preguntas · fáciles e intermedias';
+      startBtn.disabled = false;
+      startBtn.textContent = 'Empezar';
+    })
+    .catch(err => {
+      startTitle.textContent = 'Repaso de Religión';
+      loadError.classList.add('show');
+      startBtn.textContent = 'No disponible';
+    });
+
+  /* ---------------- Screens ---------------- */
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function startQuiz(){
+    if(ALL_QUESTIONS.length === 0) return;
+    quizQuestions = orderShuffle.checked ? shuffle(ALL_QUESTIONS) : ALL_QUESTIONS.slice();
+    currentIndex = 0;
+    score = 0;
+    answered = 0;
+    updateScorePill();
+    showScreen('quiz');
+    renderQuestion();
+  }
+
+  function updateScorePill(){
+    scoreCountEl.textContent = score;
+    answeredCountEl.textContent = answered;
+  }
+
+  function renderQuestion(){
+    hasAnsweredCurrent = false;
+    const q = quizQuestions[currentIndex];
+
+    progressFill.style.width = ((currentIndex) / quizQuestions.length * 100) + '%';
+
+    tagCategory.textContent = q.category;
+    tagDifficulty.textContent = q.difficulty === 'facil' ? 'Fácil' : 'Intermedia';
+    tagDifficulty.className = 'tag ' + (q.difficulty === 'facil' ? 'tag-easy' : 'tag-medium');
+
+    questionText.textContent = q.question;
+
+    optionsGrid.innerHTML = '';
+    optionsGrid.classList.remove('locked');
+    optionsGrid.classList.remove('cols-2', 'cols-2x2');
+    optionsGrid.classList.add(q.options.length === 2 ? 'cols-2' : 'cols-2x2');
+
+    q.options.forEach((optText, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option c' + idx;
+      btn.textContent = optText;
+      btn.addEventListener('click', () => selectAnswer(idx));
+      optionsGrid.appendChild(btn);
+    });
+
+    nextBtn.classList.add('hidden');
+  }
+
+  function selectAnswer(idx){
+    if(hasAnsweredCurrent) return;
+    hasAnsweredCurrent = true;
+    answered++;
+
+    const q = quizQuestions[currentIndex];
+    const correctIdx = q.answer;
+    const isCorrect = idx === correctIdx;
+    if(isCorrect) score++;
+
+    updateScorePill();
+
+    const buttons = optionsGrid.querySelectorAll('.option');
+    buttons.forEach((btn, i) => {
+      if(i === correctIdx){
+        btn.classList.add('reveal-correct');
+        btn.innerHTML = '<span class="mark">✓</span>' + btn.textContent;
+      } else if(i === idx){
+        btn.classList.add('chosen', 'reveal-wrong');
+        btn.innerHTML = '<span class="mark">✕</span>' + btn.textContent;
+      }
+    });
+    optionsGrid.classList.add('locked');
+
+    if(isCorrect){
+      playCorrectSound();
+      const rect = optionsGrid.getBoundingClientRect();
+      burstConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2, 36);
+    } else {
+      playWrongSound();
+    }
+
+    nextBtn.classList.remove('hidden');
+  }
+
+  function nextQuestion(){
+    currentIndex++;
+    if(currentIndex >= quizQuestions.length){
+      finishQuiz();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function finishQuiz(){
+    progressFill.style.width = '100%';
+    showScreen('end');
+
+    finalScoreLine.textContent = score + ' / ' + answered;
+
+    const ratio = answered === 0 ? 0 : score / answered;
+    let msg;
+    if(ratio >= 0.8){
+      msg = 'Se nota que os quedó muy buena base en Primaria. ¡Vamos a construir sobre eso este curso!';
+      burstConfetti(window.innerWidth / 2, window.innerHeight / 3, 90);
+    } else if(ratio >= 0.5){
+      msg = 'Buen punto de partida. Hay algunas cosas que repasaremos juntos con más calma.';
+    } else {
+      msg = 'No pasa nada: es justo para esto para lo que empezamos el curso. Lo iremos repasando poco a poco.';
+    }
+    finalMessage.textContent = msg;
+  }
+
+  startBtn.addEventListener('click', startQuiz);
+  nextBtn.addEventListener('click', nextQuestion);
+  finishEarlyBtn.addEventListener('click', finishQuiz);
+  restartBtn.addEventListener('click', () => showScreen('start'));
+
+  /* ---------------- Sound (Web Audio, no files needed) ---------------- */
+  let audioCtx = null;
+  function getAudioCtx(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(AC) audioCtx = new AC();
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, startTime, duration, type, peakGain){
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(peakGain, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.02);
+  }
+
+  function playCorrectSound(){
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const now = ctx.currentTime;
+    playTone(587.33, now, 0.16, 'triangle', 0.18);        // D5
+    playTone(783.99, now + 0.11, 0.22, 'triangle', 0.18); // G5
+  }
+
+  function playWrongSound(){
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const now = ctx.currentTime;
+    playTone(196.0, now, 0.30, 'sawtooth', 0.10);
+  }
+
+  /* ---------------- Confetti (lightweight canvas) ---------------- */
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx2d = canvas.getContext('2d');
+  const CONFETTI_COLORS = ['#2c4a93', '#b7333f', '#d9a441', '#2e7d5b', '#6a4c93'];
+  let particles = [];
+  let animHandle = null;
+
+  function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function burstConfetti(x, y, count){
+    count = count || 36;
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced) return;
+
+    for(let i = 0; i < count; i++){
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 3 + Math.random() * 5;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 4,
+        size: 5 + Math.random() * 5,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * Math.PI,
+        rotSpeed: (Math.random() - 0.5) * 0.3,
+        life: 0,
+        maxLife: 70 + Math.random() * 30
+      });
+    }
+    if(!animHandle){
+      animHandle = requestAnimationFrame(tickConfetti);
+    }
+  }
+
+  function tickConfetti(){
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.vy += 0.18;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      p.life++;
+
+      const fade = Math.max(0, 1 - p.life / p.maxLife);
+      ctx2d.save();
+      ctx2d.globalAlpha = fade;
+      ctx2d.translate(p.x, p.y);
+      ctx2d.rotate(p.rotation);
+      ctx2d.fillStyle = p.color;
+      ctx2d.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx2d.restore();
+    });
+
+    particles = particles.filter(p => p.life < p.maxLife);
+
+    if(particles.length > 0){
+      animHandle = requestAnimationFrame(tickConfetti);
+    } else {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+      animHandle = null;
+    }
+  }
+
+})();
+</script>
+
+</body>
+</html>
