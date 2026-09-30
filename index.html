@@ -133,6 +133,43 @@
     background:var(--amber);
   }
 
+  .answer-toggle{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:14px auto 0;
+    font-size:14px;
+    font-weight:600;
+    color:#3c3c44;
+  }
+  .answer-toggle input{
+    appearance:none;
+    width:42px;
+    height:24px;
+    margin:0;
+    border:3px solid var(--ink);
+    border-radius:999px;
+    background:#a8a8ae;
+    cursor:pointer;
+    position:relative;
+    transition:background .15s ease;
+  }
+  .answer-toggle input::after{
+    content:'';
+    position:absolute;
+    top:3px;
+    left:3px;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#fff;
+    transition:transform .15s ease;
+  }
+  .answer-toggle input:checked{ background:var(--emerald); }
+  .answer-toggle input:checked::after{ transform:translateX(18px); }
+  .answer-toggle input:focus-visible{ outline:3px solid var(--cobalt); outline-offset:3px; }
+
   .btn-primary{
     font-family:var(--font-display);
     font-size:20px;
@@ -261,6 +298,7 @@
   }
   .options-grid.cols-2{ grid-template-columns:1fr 1fr; }
   .options-grid.cols-2x2{ grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
+  .options-grid.answers-only{ grid-template-columns:1fr; }
   @media (max-width:480px){
     .options-grid.cols-2x2{ grid-template-columns:1fr; grid-template-rows:none; }
   }
@@ -477,6 +515,10 @@
       </div>
       <br>
       <button class="btn-primary" id="startBtn" disabled>Cargando preguntas…</button>
+      <label class="answer-toggle" for="showAnswersToggle">
+        <span>Mostrar la respuesta después de cada pregunta</span>
+        <input id="showAnswersToggle" type="checkbox" checked aria-label="Mostrar la respuesta después de cada pregunta">
+      </label>
       <p class="start-meta" id="startMeta"></p>
       <button class="btn-load" id="loadJsonBtn" type="button">Cargar otro archivo JSON</button>
 
@@ -492,7 +534,7 @@
     <section id="screen-quiz" class="screen">
       <div class="topbar">
         <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="score-pill">Aciertos <span id="scoreCount">0</span>/<span id="answeredCount">0</span></div>
+        <div class="score-pill" id="scorePill">Aciertos <span id="scoreCount">0</span>/<span id="answeredCount">0</span></div>
       </div>
 
       <div class="tags">
@@ -510,7 +552,7 @@
     <!-- END SCREEN -->
     <section id="screen-end" class="screen">
       <div class="eyebrow-dots"><span></span><span></span><span></span><span></span><span></span></div>
-      <h2>Repaso terminado</h2>
+      <h2 id="finalTitle">Repaso terminado</h2>
       <div id="finalScoreLine"></div>
       <p id="finalMessage"></p>
       <button class="btn-primary" id="restartBtn">Volver a jugar</button>
@@ -588,11 +630,13 @@ Reglas obligatorias:
   const startLead = document.getElementById('startLead');
   const startBtn = document.getElementById('startBtn');
   const startMeta = document.getElementById('startMeta');
+  const showAnswersToggle = document.getElementById('showAnswersToggle');
   const loadError = document.getElementById('loadError');
   const orderShuffle = document.getElementById('orderShuffle');
   const progressFill = document.getElementById('progressFill');
   const scoreCountEl = document.getElementById('scoreCount');
   const answeredCountEl = document.getElementById('answeredCount');
+  const scorePill = document.getElementById('scorePill');
   const tagCategory = document.getElementById('tagCategory');
   const tagDifficulty = document.getElementById('tagDifficulty');
   const questionText = document.getElementById('questionText');
@@ -600,6 +644,7 @@ Reglas obligatorias:
   const nextBtn = document.getElementById('nextBtn');
   const finishEarlyBtn = document.getElementById('finishEarlyBtn');
   const restartBtn = document.getElementById('restartBtn');
+  const finalTitle = document.getElementById('finalTitle');
   const finalScoreLine = document.getElementById('finalScoreLine');
   const finalMessage = document.getElementById('finalMessage');
   const loadJsonBtn = document.getElementById('loadJsonBtn');
@@ -618,6 +663,8 @@ Reglas obligatorias:
   let score = 0;
   let answered = 0;
   let hasAnsweredCurrent = false;
+  let revealAnswers = true;
+  let reviewingAnswers = false;
   let customDataLoaded = false;
   let dragDepth = 0;
 
@@ -729,6 +776,9 @@ Reglas obligatorias:
     currentIndex = 0;
     score = 0;
     answered = 0;
+    revealAnswers = showAnswersToggle.checked;
+    reviewingAnswers = false;
+    scorePill.classList.toggle('hidden', !revealAnswers);
     updateScorePill();
     showScreen('quiz');
     renderQuestion();
@@ -748,14 +798,25 @@ Reglas obligatorias:
     tagCategory.textContent = q.category;
     tagDifficulty.textContent = q.difficulty === 'facil' ? 'Fácil' : 'Intermedia';
     tagDifficulty.className = 'tag ' + (q.difficulty === 'facil' ? 'tag-easy' : 'tag-medium');
-
     questionText.textContent = q.question;
 
     optionsGrid.innerHTML = '';
-    optionsGrid.classList.remove('locked');
-    optionsGrid.classList.remove('cols-2', 'cols-2x2');
-    optionsGrid.classList.add(q.options.length === 2 ? 'cols-2' : 'cols-2x2');
+    optionsGrid.classList.remove('locked', 'cols-2', 'cols-2x2', 'answers-only');
 
+    if(reviewingAnswers){
+      const correctAnswer = document.createElement('div');
+      correctAnswer.className = 'option reveal-correct';
+      correctAnswer.textContent = q.options[q.answer];
+      correctAnswer.setAttribute('aria-label', 'Respuesta correcta: ' + q.options[q.answer]);
+      optionsGrid.classList.add('answers-only', 'locked');
+      optionsGrid.appendChild(correctAnswer);
+      nextBtn.textContent = currentIndex === quizQuestions.length - 1 ? 'Terminar repaso' : 'Siguiente respuesta';
+      nextBtn.classList.remove('hidden');
+      finishEarlyBtn.classList.add('hidden');
+      return;
+    }
+
+    optionsGrid.classList.add(q.options.length === 2 ? 'cols-2' : 'cols-2x2');
     q.options.forEach((optText, idx) => {
       const btn = document.createElement('button');
       btn.className = 'option c' + idx;
@@ -764,7 +825,9 @@ Reglas obligatorias:
       optionsGrid.appendChild(btn);
     });
 
+    nextBtn.textContent = 'Siguiente pregunta';
     nextBtn.classList.add('hidden');
+    finishEarlyBtn.classList.toggle('hidden', !revealAnswers);
   }
 
   function selectAnswer(idx){
@@ -776,8 +839,12 @@ Reglas obligatorias:
     const correctIdx = q.answer;
     const isCorrect = idx === correctIdx;
     if(isCorrect) score++;
-
     updateScorePill();
+
+    if(!revealAnswers){
+      nextQuestion();
+      return;
+    }
 
     const buttons = optionsGrid.querySelectorAll('.option');
     buttons.forEach((btn, i) => {
@@ -805,14 +872,35 @@ Reglas obligatorias:
   function nextQuestion(){
     currentIndex++;
     if(currentIndex >= quizQuestions.length){
-      finishQuiz();
+      if(reviewingAnswers){
+        finishAnswerReview();
+      } else if(revealAnswers){
+        finishQuiz();
+      } else {
+        startAnswerReview();
+      }
     } else {
       renderQuestion();
     }
   }
 
+  function startAnswerReview(){
+    currentIndex = 0;
+    reviewingAnswers = true;
+    renderQuestion();
+  }
+
+  function finishAnswerReview(){
+    progressFill.style.width = '100%';
+    finalTitle.textContent = 'Respuestas repasadas';
+    finalScoreLine.textContent = '';
+    finalMessage.textContent = 'Ya has visto todas las respuestas correctas.';
+    showScreen('end');
+  }
+
   function finishQuiz(){
     progressFill.style.width = '100%';
+    finalTitle.textContent = 'Repaso terminado';
     showScreen('end');
 
     finalScoreLine.textContent = score + ' / ' + answered;
